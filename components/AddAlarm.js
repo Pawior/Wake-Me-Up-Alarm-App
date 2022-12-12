@@ -1,24 +1,34 @@
 import { StyleSheet, Text, View, TouchableNativeFeedback } from "react-native";
 import React from "react";
 import Icon from "react-native-vector-icons/FontAwesome";
-// const myIcon = <Icon name="plus-square" size={30} color="#900" />;
+import { Database } from "../api/Database";
 
 export const AddAlarm = ({ route, navigation }) => {
-  const { alarmListState, setAlarmListState } = route.params;
+  const { alarmListState, setAlarmListState, newRecord, setNewRecord } =
+    route.params;
 
+  const addToDb = (objToAdd) => {
+    console.log("dodaje");
+    console.log(objToAdd);
+    console.log(objToAdd.hour);
+    console.log(objToAdd.minute);
+    Database.add(objToAdd.hour, objToAdd.minute, objToAdd.turned);
+  };
   const addAlarmFunc = () => {
     navigation.navigate("AlarmsList");
     let objToAdd = {
-      id: "1",
+      id: alarmListState.length + 1,
       hour: "00",
       minute: "00",
       turned: false,
     };
-    setAlarmListState([objToAdd, ...alarmListState]);
+    // setAlarmListState([objToAdd, ...alarmListState]);
+    setNewRecord(() => !newRecord);
+    addToDb(objToAdd);
   };
 
-  const myIcon = (
-    <Icon name="plus-circle" size={80} color="#0D4C92" onPress={addAlarmFunc} />
+  const plusIcon = (
+    <Icon name="plus-circle" size={80} color="#71C9CE" onPress={addAlarmFunc} />
   );
 
   return (
@@ -30,7 +40,7 @@ export const AddAlarm = ({ route, navigation }) => {
       </View>
 
       <View style={styles.iconContainer}>
-        <Text>{myIcon}</Text>
+        <Text>{plusIcon}</Text>
       </View>
     </View>
   );
@@ -39,7 +49,7 @@ export const AddAlarm = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#CFF5E7",
+    backgroundColor: "#E3FDFD",
   },
   infoTextContainer: {
     flex: 7,

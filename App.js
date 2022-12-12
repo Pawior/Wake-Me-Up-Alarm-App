@@ -16,7 +16,13 @@ LogBox.ignoreLogs([
 
 const Stack = createNativeStackNavigator();
 
+import { Database } from "./api/Database";
+
 export default function App() {
+  useEffect(() => {
+    Database.createTable();
+    console.log("tabela utworzona");
+  }, []);
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Main">
@@ -36,3 +42,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 });
+
+/* 
+colors palette:
+71C9CE
+A6E3E9
+CBF1F5
+E3FDFD
+https://colorhunt.co/palette/e3fdfdcbf1f5a6e3e971c9ce
+*/

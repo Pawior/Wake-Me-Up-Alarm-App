@@ -10,17 +10,9 @@ import {
 } from "react-native";
 import React, { useRef, useState, useEffect } from "react";
 import Icon from "react-native-vector-icons/Ionicons";
-import { TouchableNativeFeedback, LogBox } from "react-native";
+import { LogBox } from "react-native";
 import { Animated } from "react-native";
-
-const trashIcon = (
-  <Icon.Button
-    backgroundColor="#E3FDFD"
-    name="ios-trash-bin"
-    size={30}
-    color="#71C9CE"
-  />
-); // Tutaj jest button wiec mg dac onpressa
+import { Database } from "../api/Database";
 
 const ArrowUpIcon = (
   <Icon.Button
@@ -44,7 +36,10 @@ const Item = ({ item, backgroundColor, onPress }) => (
   </TouchableOpacity>
 );
 
-const ListItem = ({ hour, minute }) => {
+const ListItem = ({ id, hour, minute, deleteFromList }) => {
+  /**--------------------------------------------
+   *               Hooks and data variables
+   *---------------------------------------------**/
   useEffect(() => {
     LogBox.ignoreLogs(["VirtualizedLists should never be nested"]);
   }, []);
@@ -63,20 +58,22 @@ const ListItem = ({ hour, minute }) => {
   const [isRolled, setIsRolled] = useState(false);
   const [isWeekSelected, setIsWeekSelected] = useState();
   const [selectedId, setSelectedId] = useState([]);
+  const [isEnabled, setIsEnabled] = useState(false);
 
+  /**----------------------
+   *    Animation utils functions
+   *------------------------**/
   const heightIn = () => {
-    // Will change fadeAnim value to 1 in 5 seconds
-    console.log(heightAnim);
+    // console.log(heightAnim);
     setIsRolled(true);
     Animated.timing(heightAnim, {
-      toValue: windowHeight / 7,
+      toValue: windowHeight / 6,
       duration: 1000,
       useNativeDriver: false,
     }).start();
   };
 
   const heightOut = () => {
-    // Will change fadeAnim value to 0 in 3 seconds
     setIsRolled(false);
     Animated.timing(heightAnim, {
       toValue: windowHeight / 4,
@@ -87,8 +84,22 @@ const ListItem = ({ hour, minute }) => {
 
   const heightToggle = () => {
     isRolled ? heightOut() : heightIn();
-    console.log(heightAnim);
+    // console.log(heightAnim);
   };
+
+  /**----------------------
+   *    Db utils functions
+   *------------------------**/
+  const deleteFromDb = () => {
+    console.log("usuwam z bazy");
+    Database.remove(id);
+    deleteFromList(id);
+    // Database.removeAll();
+  };
+
+  /**----------------------
+   *    Icons
+   *------------------------**/
   const ArrowDownIcon = (
     <Icon.Button
       name="ios-arrow-down-circle-outline"
@@ -99,13 +110,27 @@ const ListItem = ({ hour, minute }) => {
     />
   );
 
+  const TrashIcon = (
+    <Icon.Button
+      backgroundColor="#E3FDFD"
+      name="ios-trash-bin"
+      size={30}
+      color="#71C9CE"
+      onPress={deleteFromDb}
+    />
+  ); // Tutaj jest button wiec mg dac onpressa
+
+  /**----------------------
+   *    Week Day Item render func
+   *------------------------**/
+
   const renderItem = ({ item }) => {
     let backgroundColor = "";
-    console.log(item.id);
+    // console.log(item.id);
 
     if (selectedId.includes(item.id)) {
       backgroundColor = "#71C9CE";
-    } else backgroundColor = "#A6E3E9";
+    } else backgroundColor = "#CBF1F5";
 
     // const color = item.id === selectedId ? "white" : "black";
 
@@ -126,7 +151,13 @@ const ListItem = ({ hour, minute }) => {
     );
   };
 
-  useEffect(() => {}, [selectedId]);
+  // useEffect(() => {}, [selectedId]);
+
+  /**----------------------
+   *    Handle Switch
+   *------------------------**/
+  const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
+
   return (
     <Animated.View
       style={[
@@ -136,19 +167,20 @@ const ListItem = ({ hour, minute }) => {
         },
       ]}
     >
-      {/* <Text>ListItem</Text> */}
       <View style={styles.topContainer}>
         <Text style={{ fontSize: 45 }}>
-          {hour}:{minute}
+          {hour.padStart(2, "0")}:{minute.padStart(2, "0")}
         </Text>
         <Switch
-          trackColor={{ false: "#767577", true: "#81b0ff" }}
+          trackColor={{ false: "#767577", true: "#A6E3E9" }}
           thumbColor={"#71C9CE"}
           ios_backgroundColor="#3e3e3e"
+          onValueChange={toggleSwitch}
+          value={isEnabled}
         ></Switch>
       </View>
       <View style={styles.bottomContainer}>
-        <Text> {trashIcon} </Text>
+        <Text> {TrashIcon} </Text>
         <Text> {ArrowDownIcon}</Text>
       </View>
       <View>
@@ -183,6 +215,7 @@ const styles = StyleSheet.create({
     // height: windowHeight / 4,
     justifyContent: "space-between",
     marginBottom: 30,
+    overflow: "hidden",
   },
   topContainer: {
     flexDirection: "row",
