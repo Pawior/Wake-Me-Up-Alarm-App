@@ -2,11 +2,17 @@ import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import React, { useEffect } from "react";
 
 // import ListItem from "./components/ListItem";
 import Main from "./components/Main";
 import { AlarmsList } from "./components/AlarmsList";
 import { AddAlarm } from "./components/AddAlarm";
+import { LogBox } from "react-native";
+
+LogBox.ignoreLogs([
+  "Non-serializable values were found in the navigation state",
+]);
 
 const Stack = createNativeStackNavigator();
 

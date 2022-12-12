@@ -1,4 +1,10 @@
-import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  TouchableNativeFeedback,
+} from "react-native";
 import React from "react";
 
 export const Main = ({ navigation }) => {
@@ -8,7 +14,21 @@ export const Main = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity
+      <TouchableNativeFeedback
+        background={TouchableNativeFeedback.Ripple("rgba(255,255,255,1)", true)}
+        onPress={() => moveToList()}
+        style={{
+          width: 100,
+          height: 100,
+        }}
+      >
+        <View style={{ width: "100%", height: 200, background: "red" }}>
+          <Text style={{ fontSize: 60, textAlign: "center" }}>
+            WakeMeUp Alarm App
+          </Text>
+        </View>
+      </TouchableNativeFeedback>
+      {/* <TouchableOpacity
         style={{
           justifyContent: "center",
           alignItems: "center",
@@ -17,9 +37,11 @@ export const Main = ({ navigation }) => {
         }}
         onPress={moveToList}
       >
-        <Text style={{ fontSize: 90, textAlign: "center" }}> SQLite App</Text>
-      </TouchableOpacity>
-      <Text style={styles.smallText}> manage sqlite</Text>
+        <Text style={{ fontSize: 60, textAlign: "center" }}>
+          WakeMeUp Alarm App
+        </Text>
+      </TouchableOpacity> */}
+      <Text style={styles.smallText}> using sqlite</Text>
       <Text style={styles.smallText}> database</Text>
     </View>
   );

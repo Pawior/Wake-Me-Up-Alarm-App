@@ -17,16 +17,21 @@ export const AlarmsList = ({ navigation }) => {
   }, [alarmListState]);
 
   const myIcon = (
-    <Icon name="plus-circle" size={80} color="#0D4C92" onPress={goToAddAlarm} />
+    <Icon name="plus-circle" size={80} color="#E3FDFD" onPress={goToAddAlarm} />
   );
 
   return (
     <View style={styles.container}>
       <View style={styles.alarmsContainer}>
         <ScrollView>
-          {/* <Text> Tsegts</Text> */}
-          {alarmListState.map((item) => {
-            return <ListItem time={item.time}></ListItem>;
+          {alarmListState.map((item, idx) => {
+            return (
+              <ListItem
+                key={idx}
+                hour={item.hour}
+                minute={item.minute}
+              ></ListItem>
+            );
           })}
         </ScrollView>
       </View>
@@ -41,7 +46,7 @@ export const AlarmsList = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#CFF5E7",
+    backgroundColor: "#E3FDFD",
   },
   alarmsContainer: {
     flex: 7,

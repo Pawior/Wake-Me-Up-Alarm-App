@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, TouchableNativeFeedback } from "react-native";
 import React from "react";
 import Icon from "react-native-vector-icons/FontAwesome";
 // const myIcon = <Icon name="plus-square" size={30} color="#900" />;
@@ -10,7 +10,9 @@ export const AddAlarm = ({ route, navigation }) => {
     navigation.navigate("AlarmsList");
     let objToAdd = {
       id: "1",
-      time: "00:00",
+      hour: "00",
+      minute: "00",
+      turned: false,
     };
     setAlarmListState([objToAdd, ...alarmListState]);
   };
@@ -53,5 +55,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    borderRadius: 15,
+    overflow: "hidden",
   },
 });
