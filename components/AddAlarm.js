@@ -11,6 +11,7 @@ import React, { useState } from "react";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { Database } from "../api/Database";
 const windowWidth = Dimensions.get("window").width;
+import { insideData, outsideData } from "../utils/helperData";
 
 export const AddAlarm = ({ route, navigation }) => {
   const { alarmListState, setAlarmListState, newRecord, setNewRecord } =
@@ -49,61 +50,26 @@ export const AddAlarm = ({ route, navigation }) => {
     <Icon name="plus-circle" size={80} color="#71C9CE" onPress={addAlarmFunc} />
   );
 
-  const outsideData = [
-    {
-      id: "1",
-    },
-    {
-      id: "2",
-    },
-    {
-      id: "3",
-    },
-    {
-      id: "4",
-    },
-    {
-      id: "5",
-    },
-    {
-      id: "6",
-    },
-    {
-      id: "7",
-    },
-    {
-      id: "8",
-    },
-    {
-      id: "9",
-    },
-    {
-      id: "10",
-    },
-    {
-      id: "11",
-    },
-    {
-      id: "12",
-    },
-  ];
-  let R = windowWidth / 2 - 30;
-  let offset = 153;
+  // let R = windowWidth / 2 - 30;
   function toDegrees(angle) {
     return angle * (180 / Math.PI);
   }
 
   function sinDegrees(angleDegrees) {
-    return Math.sin((angleDegrees * Math.PI) / 180);
+    return Math.sin(((angleDegrees + 90) * Math.PI) / 180);
   }
   function cosDegrees(angleDegrees) {
-    return Math.cos((angleDegrees * Math.PI) / 180);
+    return Math.cos(((angleDegrees + 90) * Math.PI) / 180);
   }
-  const outsideNumber = (item, i) => {
+  const outsideNumber = (item, i, R, isBig) => {
+    let offset;
+    let fontSize;
+    isBig ? (offset = 153) : (offset = 158);
+    isBig ? (fontSize = 25) : (fontSize = 15);
     let x = R * cosDegrees(parseInt(i) * 30) + offset;
     let y = R * sinDegrees(parseInt(i) * 30) + offset;
-    console.log("------------");
-    console.log(i);
+    // console.log("------------");
+    // console.log(i);
 
     // let x = R * Math.cos((i * Math.PI) / 6);
     // let y = R * Math.sin((i * Math.PI) / 6);
@@ -111,9 +77,24 @@ export const AddAlarm = ({ route, navigation }) => {
     // console.log(parseInt(item.id));
     // console.log(x);
     return (
-      <View style={[styles.bigNumber, { right: x, bottom: y }]} key={item.id}>
-        <Text> {item.id}</Text>
-      </View>
+      <TouchableNativeFeedback
+        // useForeground={true}
+        // style={{ borderRadius: 25 }}
+        background={TouchableNativeFeedback.Ripple("#E3FDFD", true)}
+      >
+        <View
+          style={[
+            isBig ? styles.bigNumber : styles.smallNumber,
+            { right: x, bottom: y },
+          ]}
+          key={item.id}
+        >
+          <Text style={isBig ? styles.bigNumberText : styles.smallNumberText}>
+            {" "}
+            {item.id}
+          </Text>
+        </View>
+      </TouchableNativeFeedback>
     );
   };
   return (
@@ -149,7 +130,10 @@ export const AddAlarm = ({ route, navigation }) => {
       <View style={styles.pickContainer}>
         <View style={styles.outsideClock}>
           {outsideData.map((item, i) => {
-            return outsideNumber(item, i);
+            return outsideNumber(item, i, windowWidth / 2 - 30, true);
+          })}
+          {insideData.map((item, i) => {
+            return outsideNumber(item, i, windowWidth / 2 - 90, false);
           })}
         </View>
         <View style={styles.insideClock}></View>
@@ -214,13 +198,31 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 50 / 2,
-    // textAlign: "center",
+    textAlign: "center",
     position: "absolute",
-
-    // position: "absolute",
-    // top: 50,
-    // left: 50,
-    zIndex: 100,
-    // position: "absolute",
+    overflow: "hidden",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  smallNumber: {
+    backgroundColor: "#363635",
+    width: 35,
+    height: 35,
+    borderRadius: 35 / 2,
+    textAlign: "center",
+    position: "absolute",
+    overflow: "hidden",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  bigNumberText: {
+    color: "black",
+    fontSize: 25,
+    paddingRight: 6,
+  },
+  smallNumberText: {
+    color: "white",
+    fontSize: 15,
+    paddingRight: 4,
   },
 });
