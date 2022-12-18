@@ -11,7 +11,7 @@ import React, { useState } from "react";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { Database } from "../api/Database";
 const windowWidth = Dimensions.get("window").width;
-import { insideData, outsideData } from "../utils/helperData";
+import { insideData, outsideData, minuteData } from "../utils/helperData";
 
 export const AddAlarm = ({ route, navigation }) => {
   const { alarmListState, setAlarmListState, newRecord, setNewRecord } =
@@ -61,6 +61,27 @@ export const AddAlarm = ({ route, navigation }) => {
   function cosDegrees(angleDegrees) {
     return Math.cos(((angleDegrees + 90) * Math.PI) / 180);
   }
+  const pickHour = (pickedTime) => {
+    console.log("pick godziny");
+    setHour(pickedTime);
+  };
+  const pickMinute = (pickedTime) => {
+    let minuteNum = parseInt(minute);
+    let pickedTimeNum = parseInt(pickedTime);
+    if (
+      minuteNum >= pickedTimeNum &&
+      minuteNum < pickedTimeNum + 5 &&
+      minuteNum > pickedTimeNum - 5
+    ) {
+      let newVal = (parseInt(minute) + 1).toString();
+      setMinute(newVal);
+    } else {
+      setMinute(pickedTime);
+    }
+  };
+  const pickTime = (pickedTime) => {
+    minOrHour ? pickHour(pickedTime) : pickMinute(pickedTime);
+  };
   const outsideNumber = (item, i, R, isBig) => {
     let offset;
     let fontSize;
@@ -78,6 +99,8 @@ export const AddAlarm = ({ route, navigation }) => {
     // console.log(x);
     return (
       <TouchableNativeFeedback
+        key={item.id}
+        onPress={() => pickTime(item.id)}
         // useForeground={true}
         // style={{ borderRadius: 25 }}
         background={TouchableNativeFeedback.Ripple("#E3FDFD", true)}
@@ -128,14 +151,22 @@ export const AddAlarm = ({ route, navigation }) => {
         </Text>
       </View> */}
       <View style={styles.pickContainer}>
-        <View style={styles.outsideClock}>
-          {outsideData.map((item, i) => {
-            return outsideNumber(item, i, windowWidth / 2 - 30, true);
-          })}
-          {insideData.map((item, i) => {
-            return outsideNumber(item, i, windowWidth / 2 - 90, false);
-          })}
-        </View>
+        {minOrHour ? (
+          <View style={styles.outsideClock}>
+            {outsideData.map((item, i) => {
+              return outsideNumber(item, i, windowWidth / 2 - 30, true);
+            })}
+            {insideData.map((item, i) => {
+              return outsideNumber(item, i, windowWidth / 2 - 90, false);
+            })}
+          </View>
+        ) : (
+          <View style={styles.outsideClock}>
+            {minuteData.map((item, i) => {
+              return outsideNumber(item, i, windowWidth / 2 - 30, true);
+            })}
+          </View>
+        )}
         <View style={styles.insideClock}></View>
       </View>
 

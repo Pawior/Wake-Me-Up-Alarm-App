@@ -74,5 +74,43 @@ const insideData = [
     id: "23",
   },
 ];
+const minuteData = [
+  {
+    id: "0",
+  },
+  {
+    id: "5",
+  },
+  {
+    id: "10",
+  },
+  {
+    id: "15",
+  },
+  {
+    id: "20",
+  },
+  {
+    id: "25",
+  },
+  {
+    id: "30",
+  },
+  {
+    id: "35",
+  },
+  {
+    id: "40",
+  },
+  {
+    id: "45",
+  },
+  {
+    id: "50",
+  },
+  {
+    id: "55",
+  },
+];
 
-export { insideData, outsideData };
+export { insideData, outsideData, minuteData };
