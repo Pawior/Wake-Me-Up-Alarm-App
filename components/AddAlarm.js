@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   FlatList,
   Dimensions,
+  Vibration,
 } from "react-native";
 import React, { useState } from "react";
 import Icon from "react-native-vector-icons/FontAwesome";
@@ -32,8 +33,8 @@ export const AddAlarm = ({ route, navigation }) => {
     navigation.navigate("AlarmsList");
     let objToAdd = {
       id: alarmListState.length + 1,
-      hour: "00",
-      minute: "00",
+      hour: hour,
+      minute: minute,
       turned: false,
     };
     // setAlarmListState([objToAdd, ...alarmListState]);
@@ -80,6 +81,7 @@ export const AddAlarm = ({ route, navigation }) => {
     }
   };
   const pickTime = (pickedTime) => {
+    Vibration.vibrate();
     minOrHour ? pickHour(pickedTime) : pickMinute(pickedTime);
   };
   const outsideNumber = (item, i, R, isBig) => {

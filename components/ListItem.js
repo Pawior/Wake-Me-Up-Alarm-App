@@ -7,12 +7,15 @@ import {
   Dimensions,
   FlatList,
   TouchableOpacity,
+  Vibration,
 } from "react-native";
 import React, { useRef, useState, useEffect } from "react";
 import Icon from "react-native-vector-icons/Ionicons";
+import IconMaterial from "react-native-vector-icons/MaterialCommunityIcons";
 import { LogBox } from "react-native";
 import { Animated } from "react-native";
 import { Database } from "../api/Database";
+import { Audio } from "expo-av";
 
 const ArrowUpIcon = (
   <Icon.Button
@@ -43,6 +46,18 @@ const ListItem = ({ id, hour, minute, deleteFromList }) => {
   useEffect(() => {
     LogBox.ignoreLogs(["VirtualizedLists should never be nested"]);
   }, []);
+  const [sound, setSound] = useState(undefined);
+
+  async function playSound() {
+    console.log("Loading Sound");
+    const { sound } = await Audio.Sound.createAsync(
+      require("../assets/cyber-alarm.mp3")
+    );
+    // setSound(sound);
+
+    console.log("Playing Sound");
+    await sound.playAsync();
+  }
 
   const weekDays = [
     { name: "Pn", id: 1 },
@@ -54,11 +69,12 @@ const ListItem = ({ id, hour, minute, deleteFromList }) => {
     { name: "Nd", id: 7 },
   ];
 
-  const heightAnim = useRef(new Animated.Value(windowHeight / 4)).current;
+  const heightAnim = useRef(new Animated.Value(windowHeight / 3)).current;
   const [isRolled, setIsRolled] = useState(false);
   const [isWeekSelected, setIsWeekSelected] = useState();
   const [selectedId, setSelectedId] = useState([]);
-  const [isEnabled, setIsEnabled] = useState(false);
+  const [isSound, setIsSound] = useState(false);
+  const [isVibration, setIsVibration] = useState(false);
 
   /**----------------------
    *    Animation utils functions
@@ -67,7 +83,7 @@ const ListItem = ({ id, hour, minute, deleteFromList }) => {
     // console.log(heightAnim);
     setIsRolled(true);
     Animated.timing(heightAnim, {
-      toValue: windowHeight / 6,
+      toValue: windowHeight / 4.5,
       duration: 1000,
       useNativeDriver: false,
     }).start();
@@ -76,7 +92,7 @@ const ListItem = ({ id, hour, minute, deleteFromList }) => {
   const heightOut = () => {
     setIsRolled(false);
     Animated.timing(heightAnim, {
-      toValue: windowHeight / 4,
+      toValue: windowHeight / 3,
       duration: 1000,
       useNativeDriver: false,
     }).start();
@@ -117,9 +133,29 @@ const ListItem = ({ id, hour, minute, deleteFromList }) => {
       size={30}
       color="#71C9CE"
       onPress={deleteFromDb}
+      // style={{ width: 10 }}
     />
   ); // Tutaj jest button wiec mg dac onpressa
-
+  const MusicOnIcon = (
+    <IconMaterial.Button
+      backgroundColor="#E3FDFD"
+      name="music"
+      size={40}
+      color="#71C9CE"
+      // onPress={deleteFromDb}
+      // style={{ width: 10 }}
+    />
+  );
+  const MusicOffIcon = (
+    <IconMaterial.Button
+      backgroundColor="#E3FDFD"
+      name="music-off"
+      size={40}
+      color="#71C9CE"
+      // onPress={deleteFromDb}
+      // style={{ width: 10 }}
+    />
+  );
   /**----------------------
    *    Week Day Item render func
    *------------------------**/
@@ -154,10 +190,83 @@ const ListItem = ({ id, hour, minute, deleteFromList }) => {
   // useEffect(() => {}, [selectedId]);
 
   /**----------------------
-   *    Handle Switch
+   *    Handle Switches
    *------------------------**/
-  const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
+  async function stopRecording() {
+    console.log("Stopping recording..");
+    await sound.unloadAsync();
+    setSound(undefined);
 
+    // await sound.stopAndUnloadAsync();
+    console.log("Recording stopped and stored at");
+  }
+  const toggleSoundSwitch = async () => {
+    if (isSound == false) {
+      stopRecording().catch(console.error);
+    }
+    setIsSound((previousState) => !previousState);
+
+    // stopRecording();
+    // setTimeout(async () => {
+    // }, 500);
+  };
+  // useEffect(() => {
+  //   console.log("useEffect");
+  //   console.log(sound);
+  //   console.log(isSound);
+  //   if (isSound == false && sound != undefined) {
+  //     console.log("robie");
+  //     stopRecording().catch(console.error);
+  //   }
+  //   // clearInterval(clockTickerInteval);
+  // }, [isSound]);
+  const toggleVibrationSwitch = () => {
+    Vibration.cancel();
+    setIsVibration((previousState) => !previousState);
+  };
+
+  /**----------------------
+   *   Clock Mechanism Handler
+   *------------------------**/
+  let clockTickerInteval;
+  // const clockMechanism = () => {
+  // };
+  // clockMechanism();
+  const startAlarm = (sound, vibra) => {
+    console.log(isSound);
+    console.log(isVibration);
+    if (isSound) {
+      playSound();
+    }
+    if (isVibration) {
+      Vibration.vibrate(5000, false);
+    }
+  };
+
+  // playSound();
+  clockTickerInteval = setInterval(() => {
+    let currHour = new Date().getHours();
+    let currMinute = new Date().getMinutes();
+    // console.log("hour: " + currHour);
+    // console.log("Minute: " + currMinute);
+    // console.log("vibra: " + isVibration);
+    // console.log("sound: " + isSound);
+
+    if (currHour == parseInt(hour) && currMinute == parseInt(minute)) {
+      console.log("ring ring");
+      console.log(isSound);
+      console.log(isVibration);
+      startAlarm(isSound, isVibration);
+
+      clearInterval(clockTickerInteval);
+    }
+    // console.log("odliczam czas");
+  }, 500);
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     console.log(isSound);
+  //   }, 666);
+  // }, [isSound]);
   return (
     <Animated.View
       style={[
@@ -168,20 +277,37 @@ const ListItem = ({ id, hour, minute, deleteFromList }) => {
       ]}
     >
       <View style={styles.topContainer}>
-        <Text style={{ fontSize: 45 }}>
-          {hour.padStart(2, "0")}:{minute.padStart(2, "0")}
-        </Text>
-        <Switch
-          trackColor={{ false: "#767577", true: "#A6E3E9" }}
-          thumbColor={"#71C9CE"}
-          ios_backgroundColor="#3e3e3e"
-          onValueChange={toggleSwitch}
-          value={isEnabled}
-        ></Switch>
+        {isVibration ? (
+          <Text style={{ fontSize: 45, color: "#D7263D" }}>
+            {hour.padStart(2, "0")}:{minute.padStart(2, "0")}
+          </Text>
+        ) : (
+          <Text style={{ fontSize: 45, color: "#000" }}>
+            {hour.padStart(2, "0")}:{minute.padStart(2, "0")}
+          </Text>
+        )}
+
+        <View>
+          <Switch
+            trackColor={{ false: "#767577", true: "#A6E3E9" }}
+            thumbColor={"#D7263D"}
+            ios_backgroundColor="#3e3e3e"
+            onValueChange={toggleVibrationSwitch}
+            value={isVibration}
+          ></Switch>
+          <Switch
+            trackColor={{ false: "#767577", true: "#A6E3E9" }}
+            thumbColor={"#71C9CE"}
+            ios_backgroundColor="#3e3e3e"
+            onValueChange={toggleSoundSwitch}
+            value={isSound}
+          ></Switch>
+        </View>
       </View>
       <View style={styles.bottomContainer}>
         <Text> {TrashIcon} </Text>
         <Text> {ArrowDownIcon}</Text>
+        <Text> {isSound ? MusicOnIcon : MusicOffIcon}</Text>
       </View>
       <View>
         <FlatList
