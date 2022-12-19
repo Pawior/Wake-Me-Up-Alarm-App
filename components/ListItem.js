@@ -16,15 +16,8 @@ import { LogBox } from "react-native";
 import { Animated } from "react-native";
 import { Database } from "../api/Database";
 import { Audio } from "expo-av";
+import BackgroundService from "react-native-background-actions";
 
-const ArrowUpIcon = (
-  <Icon.Button
-    name="ios-arrow-up-circle-outline"
-    size={30}
-    color="#0D4C92"
-    backgroundColor="#CFF5E7"
-  />
-);
 const windowHeight = Dimensions.get("window").height;
 
 // ios-trash-bin
@@ -40,6 +33,8 @@ const Item = ({ item, backgroundColor, onPress }) => (
 );
 
 const ListItem = ({ id, hour, minute, deleteFromList }) => {
+  let alreadyFired = false;
+
   /**--------------------------------------------
    *               Hooks and data variables
    *---------------------------------------------**/
@@ -53,7 +48,7 @@ const ListItem = ({ id, hour, minute, deleteFromList }) => {
     const { sound } = await Audio.Sound.createAsync(
       require("../assets/cyber-alarm.mp3")
     );
-    // setSound(sound);
+    setSound(sound);
 
     console.log("Playing Sound");
     await sound.playAsync();
@@ -125,6 +120,15 @@ const ListItem = ({ id, hour, minute, deleteFromList }) => {
       onPress={heightToggle}
     />
   );
+  const ArrowUpIcon = (
+    <Icon.Button
+      name="ios-arrow-up-circle-outline"
+      size={30}
+      color="#71C9CE"
+      backgroundColor="#E3FDFD"
+      onPress={heightToggle}
+    />
+  );
 
   const TrashIcon = (
     <Icon.Button
@@ -133,17 +137,14 @@ const ListItem = ({ id, hour, minute, deleteFromList }) => {
       size={30}
       color="#71C9CE"
       onPress={deleteFromDb}
-      // style={{ width: 10 }}
     />
-  ); // Tutaj jest button wiec mg dac onpressa
+  );
   const MusicOnIcon = (
     <IconMaterial.Button
       backgroundColor="#E3FDFD"
       name="music"
       size={40}
       color="#71C9CE"
-      // onPress={deleteFromDb}
-      // style={{ width: 10 }}
     />
   );
   const MusicOffIcon = (
@@ -194,32 +195,20 @@ const ListItem = ({ id, hour, minute, deleteFromList }) => {
    *------------------------**/
   async function stopRecording() {
     console.log("Stopping recording..");
-    await sound.unloadAsync();
+    await sound.pauseAsync();
+    alreadyFired = false;
     setSound(undefined);
 
     // await sound.stopAndUnloadAsync();
     console.log("Recording stopped and stored at");
   }
   const toggleSoundSwitch = async () => {
-    if (isSound == false) {
+    if (sound != null || sound != undefined) {
       stopRecording().catch(console.error);
     }
     setIsSound((previousState) => !previousState);
-
-    // stopRecording();
-    // setTimeout(async () => {
-    // }, 500);
   };
-  // useEffect(() => {
-  //   console.log("useEffect");
-  //   console.log(sound);
-  //   console.log(isSound);
-  //   if (isSound == false && sound != undefined) {
-  //     console.log("robie");
-  //     stopRecording().catch(console.error);
-  //   }
-  //   // clearInterval(clockTickerInteval);
-  // }, [isSound]);
+
   const toggleVibrationSwitch = () => {
     Vibration.cancel();
     setIsVibration((previousState) => !previousState);
@@ -229,44 +218,84 @@ const ListItem = ({ id, hour, minute, deleteFromList }) => {
    *   Clock Mechanism Handler
    *------------------------**/
   let clockTickerInteval;
-  // const clockMechanism = () => {
-  // };
-  // clockMechanism();
   const startAlarm = (sound, vibra) => {
-    console.log(isSound);
-    console.log(isVibration);
-    if (isSound) {
+    console.log("sound");
+    console.log(sound);
+    // console.log(isVibration);
+    if (isSound && sound == true && !alreadyFired) {
+      alreadyFired = true;
       playSound();
+      // setTimeout(() => {
+
+      // },5000)
     }
     if (isVibration) {
       Vibration.vibrate(5000, false);
     }
   };
 
-  // playSound();
-  clockTickerInteval = setInterval(() => {
-    let currHour = new Date().getHours();
-    let currMinute = new Date().getMinutes();
-    // console.log("hour: " + currHour);
-    // console.log("Minute: " + currMinute);
-    // console.log("vibra: " + isVibration);
-    // console.log("sound: " + isSound);
+  // const sleep = (time) =>
+  //   new Promise((resolve) => setTimeout(() => resolve(), time));
+  // const veryIntensiveTask = async (taskDataArguments) => {
+  //   // Example of an infinite loop task
+  //   const { delay } = taskDataArguments;
+  //   console.log(delay);
+  //   console.log(delay);
+  //   console.log(delay);
+  //   console.log(delay);
+  //   console.log(delay);
+  //   console.log(delay);
+  //   await new Promise(async (resolve) => {
+  //     for (let i = 0; BackgroundService.isRunning(); i++) {
+  //       console.log(i);
+  //       await sleep(4000);
+  //     }
+  //   });
+  // };
+  // // Options
+  // const options = {
+  //   taskName: "Example",
+  //   taskTitle: "ExampleTask title",
+  //   taskDesc: "ExampleTask description",
+  //   taskIcon: {
+  //     name: "ic_launcher",
+  //     type: "mipmap",
+  //   },
+  //   color: "#ff00ff",
+  //   linkingURI: "yourSchemeHere://chat/jane", // See Deep Linking for more info
+  //   parameters: {
+  //     delay: 4000,
+  //   },
+  // };
 
-    if (currHour == parseInt(hour) && currMinute == parseInt(minute)) {
-      console.log("ring ring");
-      console.log(isSound);
-      console.log(isVibration);
-      startAlarm(isSound, isVibration);
+  // const startBackgroundTasks = async () => {
+  //   console.log("start");
+  //   await BackgroundService.start(veryIntensiveTask, options);
+  //   await BackgroundService.updateNotification({
+  //     taskDesc: "New ExampleTask description",
+  //   });
+  // };
+  let isIntervalWorking = false;
+  useEffect(() => {
+    // startBackgroundTasks();
+    clearInterval(clockTickerInteval);
+    if (!isIntervalWorking) {
+      clockTickerInteval = setInterval(() => {
+        isIntervalWorking = true;
+        let currHour = new Date().getHours();
+        let currMinute = new Date().getMinutes();
+        if (currHour == parseInt(hour) && currMinute == parseInt(minute)) {
+          isIntervalWorking = false;
+          console.log("ring ring");
+          console.log(isSound);
+          console.log(isVibration);
+          startAlarm(isSound, isVibration);
 
-      clearInterval(clockTickerInteval);
+          clearInterval(clockTickerInteval);
+        }
+      }, 200);
     }
-    // console.log("odliczam czas");
-  }, 500);
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     console.log(isSound);
-  //   }, 666);
-  // }, [isSound]);
+  }, [isSound, isVibration]);
   return (
     <Animated.View
       style={[
@@ -306,7 +335,7 @@ const ListItem = ({ id, hour, minute, deleteFromList }) => {
       </View>
       <View style={styles.bottomContainer}>
         <Text> {TrashIcon} </Text>
-        <Text> {ArrowDownIcon}</Text>
+        <Text> {!isRolled ? ArrowDownIcon : ArrowUpIcon}</Text>
         <Text> {isSound ? MusicOnIcon : MusicOffIcon}</Text>
       </View>
       <View>

@@ -71,7 +71,7 @@ export const AddAlarm = ({ route, navigation }) => {
     let pickedTimeNum = parseInt(pickedTime);
     if (
       minuteNum >= pickedTimeNum &&
-      minuteNum < pickedTimeNum + 5 &&
+      minuteNum < pickedTimeNum + 4 &&
       minuteNum > pickedTimeNum - 5
     ) {
       let newVal = (parseInt(minute) + 1).toString();
